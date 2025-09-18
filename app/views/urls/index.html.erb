@@ -1,0 +1,14 @@
+<h1>All URLs</h1>
+
+<table>
+  <tr>
+    <th>Original URL</th>
+    <th>Short URL</th>
+  </tr>
+  <% @urls.each do |url| %>
+    <tr>
+      <td><%= url.original_url %></td>
+      <td><%= link_to short_url(url.short_url), short_url(url.short_url) %></td>
+    </tr>
+  <% end %>
+</table>
