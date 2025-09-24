@@ -23,10 +23,15 @@ class UrlsController < ApplicationController
 
   def redirect
     url = Url.find_by(short_url: params[:short_url])
-    if url
+    if url.nil?
+      render plain: "URL not found", status: :not_found
+      return
+    end
+    if url.can_be_clicked?
+      url.increment!(:click_count)
       redirect_to url.original_url, allow_other_host: true
     else
-      render plain: "URL not found", status: :not_found
+      render plain: "This short URL has reached its maximum allowed clicks.", status: :forbidden
     end
   end
 
@@ -37,6 +42,6 @@ class UrlsController < ApplicationController
   private
 
   def url_params
-    params.require(:url).permit(:original_url)
+    params.require(:url).permit(:original_url, :max_click)
   end
 end
