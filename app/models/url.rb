@@ -1,4 +1,14 @@
 class Url < ApplicationRecord
+  # Track the number of times a URL has been clicked
+  attribute :click_count, :integer, default: 0
+  # Allow dynamic max_click per URL (no default, must be set from form)
+  attribute :max_click, :integer
+
+  before_validation :reset_click_count, on: :create
+
+  def reset_click_count
+    self.click_count = 0 if click_count.nil?
+  end
   validates :original_url, presence: true
   validate :original_url_is_valid_route
   validates :short_url, uniqueness: true
@@ -6,6 +16,17 @@ class Url < ApplicationRecord
 
   before_validation :generate_short_url, on: :create
   before_validation :generate_token, on: :create
+
+  def can_be_clicked?
+    return false if max_click.nil?
+    click_count <= max_click
+  end
+
+  # Sets the click_count to max_click
+  def maximize_click_count!
+    return if max_click.nil?
+    update!(click_count: max_click)
+  end
 
   private
 
